@@ -1,0 +1,40 @@
+# Arquivos de ambiente virtual
+venv/
+env/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.pdb
+*.egg-info/
+dist/
+build/
+
+# Configurações do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Configurações de IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.bak
+
+# Arquivos de cache
+*.cache
+*.pickle
+*.pkl
+
+# Dependências geradas por Poetry ou Pipenv (se aplicável)
+poetry.lock
+Pipfile.lock
+
+# Arquivos de execução e segurança
+*.env
+.env.*
+instance/
