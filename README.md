@@ -35,8 +35,7 @@ O projeto está organizado nos seguintes arquivos:
 
 1. Clone este repositório:
    ```bash
-   git clone <url_do_repositorio>
-   cd <nome_do_repositorio>
+   git clone (https://github.com/PegouOcodigoDev/clustering-de-images.git)
    ```
 
 2. Instale as dependências:
