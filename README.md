@@ -79,7 +79,7 @@ O projeto está organizado nos seguintes arquivos:
 - Para garantir a precisão, o modelo espera imagens com resolução adequada e rostos visíveis.
 
 ## Visualização dos resultados
-![](resultados.pdf)
+![pdf](resultados.pdf)
 
 
 ## Contribuição
