@@ -78,6 +78,10 @@ O projeto está organizado nos seguintes arquivos:
 - O algoritmo embaralha as imagens antes do agrupamento para garantir que o processo não dependa da ordem de upload.
 - Para garantir a precisão, o modelo espera imagens com resolução adequada e rostos visíveis.
 
+## Resultados
+![resultados](resultados.pdf)
+
+
 ## Contribuição
 
 Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
