@@ -1,8 +1,4 @@
-# Identificador de Rostos
-
-Este projeto é uma aplicação para identificação e agrupamento de rostos utilizando aprendizado de máquina. Ele permite que os usuários façam upload de múltiplas imagens e as agrupem automaticamente com base em sua similaridade facial.
-
-## Estrutura do Projeto
+# Estrutura do Projeto
 
 O projeto está organizado nos seguintes arquivos:
 
