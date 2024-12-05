@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 
 
-def del_group_dir():
-    cluster_dir = os.path.abspath("cluster")
+def del_group_dir(dir_name):
+    cluster_dir = os.path.abspath(dir_name)
     if os.path.exists(cluster_dir):
         try:
             shutil.rmtree(cluster_dir) 
@@ -18,7 +18,7 @@ def del_group_dir():
 
 def make_groups_dir(images, labels):
     try:
-        del_group_dir()
+        del_group_dir("cluster")
         os.makedirs("cluster", exist_ok=True)
         cluster_dir = os.path.abspath("cluster")
         unique_labels = set(labels)

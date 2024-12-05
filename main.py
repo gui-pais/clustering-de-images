@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 import random 
-from clustering import group_faces
+from utils.clustering import group_faces
 
 if __name__ == "__main__":
     st.title("Identificador de Rostos")

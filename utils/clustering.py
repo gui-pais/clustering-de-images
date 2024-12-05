@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.cluster import KMeans
 from keras_facenet import FaceNet
-from processing import load_images
-from dirs import make_groups_dir
+from utils.processing import load_images
+from utils.dirs import make_groups_dir
 
 def detect_faces(imgs: np.array) -> np.array:
     try:
