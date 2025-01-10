@@ -30,7 +30,8 @@ def make_groups_dir(images, labels):
         for i, (img, label) in enumerate(zip(images, labels)):
             cluster_path = os.path.join(cluster_dir, f"cluster_{label}")
             img_path = os.path.join(cluster_path, f"image_{i+1}.jpg")
-            cv2.imwrite(img_path, (img).astype(np.uint8))
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(img_path, (img).astype(np.uint8), )
         
         print("Imagens agrupadas e salvas com sucesso.")
     except Exception as e:

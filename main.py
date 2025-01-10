@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import random 
 from utils.clustering import group_faces
+from time import time
 
 if __name__ == "__main__":
     st.title("Identificador de Rostos")
@@ -19,8 +20,10 @@ if __name__ == "__main__":
         random.shuffle(uploaded_files)
         
         if st.button("Processar"):
-            group_faces("faces")  
-            st.success("Agrupamento realizado com sucesso!")
+            sart_time = time()
+            group_faces("faces")
+            execution_time = time() - sart_time
+            st.success("Agrupamento realizado com sucesso! tempo de execução: {:.2f} segundos".format(execution_time))
 
             st.write("Imagens agrupadas:")
             for i, label in enumerate(os.listdir("cluster")):

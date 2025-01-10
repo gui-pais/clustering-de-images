@@ -25,7 +25,7 @@ def cluster_images(features: np.array) -> np.array:
         if len(features) == 0:
             raise ValueError("Nenhum recurso foi fornecido para clustering.")
         
-        kmeans = KMeans(n_clusters=10, random_state=42)
+        kmeans = KMeans(n_clusters=25, random_state=42)
         kmeans.fit(features)
         return kmeans.labels_
     except Exception as e:

@@ -30,7 +30,7 @@ Thumbs.db
 *.pickle
 *.pkl
 
-# Dependências geradas por Poetry ou Pipenv (se aplicável)
+# Dependências geradas por Poetry ou Pipenv 
 poetry.lock
 Pipfile.lock
 
@@ -38,3 +38,10 @@ Pipfile.lock
 *.env
 .env.*
 instance/
+
+# imagem de exemplo
+faces/
+cluster/
+9At/
+faces_recognizeds/
+teste_reconhecimento/

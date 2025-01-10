@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+# from threading import Thread
 
 def preprocess_image(img_path: str) -> np.array:
     try:
@@ -11,6 +12,8 @@ def preprocess_image(img_path: str) -> np.array:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (160, 160))
         return img
+        # if img is not None:
+        #     result.append(img)
     
     except Exception as e:
         print(f"Erro ao pré-processar a imagem {img_path}: {e}")
@@ -19,6 +22,7 @@ def preprocess_image(img_path: str) -> np.array:
 
 def load_images(base_path: str) -> np.array:
     images = []
+    # threads = []
     try:
         for root, _, files in os.walk(base_path):
             for file in files:
