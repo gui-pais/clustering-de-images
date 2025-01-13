@@ -2,10 +2,25 @@ import dlib
 import cv2
 import os
 import numpy as np
-from dirs import del_group_dir
 from time import time
 import pickle
 from collections import namedtuple
+
+def get_valid_image(image_path):
+    try:
+        if not os.path.exists(image_path):
+            print(f"Imagem não encontrada: {image_path}")
+            return None
+        if not image_path.lower().endswith((".jpg", ".jpeg", ".png")):
+            print(f"Formato de imagem inválido: {image_path}")
+            return None
+        img = cv2.imread(image_path)
+        if img is None:
+            print(f"Erro ao carregar a imagem: {image_path}")
+            return None
+        return img
+    except Exception as e:
+        raise ValueError(f"Erro ao obter a imagem: {e}")
 
 def get_faces(image, unique=False):
     try:
@@ -32,43 +47,8 @@ def get_descriptors(image, shape, model_describer="media/dlib_face_recognition_r
     except Exception as e:
         raise ValueError(f"Erro ao obter descritores faciais: {e}")
 
-def get_valid_image(image_path):
-    try:
-        if not os.path.exists(image_path):
-            print(f"Imagem não encontrada: {image_path}")
-            return None
-        if not image_path.lower().endswith((".jpg", ".jpeg", ".png")):
-            print(f"Formato de imagem inválido: {image_path}")
-            return None
-        img = cv2.imread(image_path)
-        if img is None:
-            print(f"Erro ao carregar a imagem: {image_path}")
-            return None
-        return img
-    except Exception as e:
-        raise ValueError(f"Erro ao obter a imagem: {e}")
-
-def get_recognized_faces(group_dir="teste_reconhecimento"):
-    recognized_faces = {}
-    try:
-        if os.path.exists(group_dir):
-            for file in os.listdir(group_dir):
-                name = file.split(".")[0]
-                image_path = os.path.join(group_dir, file)
-                image = get_valid_image(image_path)
-                if image is None:
-                    continue
-                faces = get_faces(image, unique=True)
-                if faces is None:
-                    continue
-                shape = get_points(image, faces)
-                descriptor = get_descriptors(image, shape)
-                recognized_faces[name] = descriptor
-        return recognized_faces
-    except Exception as e:
-        raise ValueError(f"Erro ao criar faces reconhecidas: {e}")
-
 def predict(image, recognized_faces, method=3):
+    recognized_faces_copy = recognized_faces.copy()
     persons_recognized = {}
     try:
         faces = get_faces(image)      
@@ -92,14 +72,52 @@ def predict(image, recognized_faces, method=3):
                 case 3:
                     points = get_points(image, face)
                     desc = get_descriptors(image, points)
-                    min_index = np.argmin([np.linalg.norm(desc - descriptor) for descriptor in recognized_faces.values()])
-                    name = list(recognized_faces.keys())[min_index]
-                    if np.linalg.norm(desc - recognized_faces[name]) < 0.58888888888888888888:
+                    min_index = np.argmin([np.linalg.norm(desc - descriptor) for descriptor in recognized_faces_copy.values()])
+                    name = list(recognized_faces_copy.keys())[min_index]
+                    if np.linalg.norm(desc - recognized_faces_copy[name]) < 0.58888888888888888888:
+                        del recognized_faces_copy[name]
                         persons_recognized[name] = face
                             
         return persons_recognized
     except Exception as e:
         raise ValueError(f"Erro ao realizar predição: {e}")
+    
+def get_recognized_faces(group_dir="points"):
+    recognized_faces = {}
+    try:
+        if os.path.exists(group_dir):
+            for file in os.listdir(group_dir):
+                name = file.split(".")[0]
+                image_path = os.path.join(group_dir, file)
+                image = get_valid_image(image_path)
+                if image is None:
+                    continue
+                faces = get_faces(image, unique=True)
+                if faces is None:
+                    continue
+                shape = get_points(image, faces)
+                descriptor = get_descriptors(image, shape)
+                recognized_faces[name] = descriptor
+        return recognized_faces
+    except Exception as e:
+        raise ValueError(f"Erro ao criar faces reconhecidas: {e}")
+
+def save_recognized_faces(save_name):
+    try:
+        start_time = time()
+        recognized_faces = get_recognized_faces()
+        print(f"Tempo para obter as faces reconhecidas: {time() - start_time:.2f} segundos")
+        with open(f'{save_name}.pkl', 'wb') as f:
+            pickle.dump(recognized_faces, f)
+    except Exception as e:
+        raise ValueError(f"Erro ao salvar faces reconhecidas: {e}")
+
+def load_recognized_faces():
+    try:
+        with open('dict_file.pkl', 'rb') as f:
+            return pickle.load(f)
+    except Exception as e:
+        raise ValueError(f"Erro ao carregar faces reconhecidas: {e}")
 
 def split_image(image_path, output_dir="split_images"):
     try:
@@ -155,27 +173,9 @@ def draw_points(image):
     except Exception as e:
         raise ValueError(f"Erro ao desenhar pontos: {e}")
 
-def save_recognized_faces():
-    try:
-        start_time = time()
-        recognized_faces = get_recognized_faces()
-        print(f"Tempo para obter as faces reconhecidas: {time() - start_time:.2f} segundos")
-        with open('dict_file.pkl', 'wb') as f:
-            pickle.dump(recognized_faces, f)
-    except Exception as e:
-        raise ValueError(f"Erro ao salvar faces reconhecidas: {e}")
-
-def load_recognized_faces():
-    try:
-        with open('dict_file.pkl', 'rb') as f:
-            return pickle.load(f)
-    except Exception as e:
-        raise ValueError(f"Erro ao carregar faces reconhecidas: {e}")
-
 def process_image(image_path):
     try:
-        start_time = time()
-        
+        start_time = time()  
         recognized_faces = load_recognized_faces()
         image = get_valid_image(image_path)
         persons_recognized = predict(image, recognized_faces, method=3)
@@ -187,29 +187,15 @@ def process_image(image_path):
     except Exception as e:
         raise ValueError(f"Erro ao processar a imagem: {e}")
 
-# save_recognized_faces()
-
-#teste geral
-for root, _, files in os.walk("9At"):
-    count = len(files)
-    start_time = time()
-    for file in files:
-        image_path = os.path.join(root, file)
-        process_image(image_path)
-    end_time = time() - start_time
-    print(f"faces reconhecidas por minuto {count/(end_time/60)}")
-    print(f"Tempo para reconhecer as faces gerais: {time() - start_time:.2f} segundos")
-    break
-
-#teste com uma imagem
-# image_path = "9At/20241127112935.jpg"
-# process_image(image_path)
-
-#teste com divisão de imagem
-# image_path = "9At/20241127112935.jpg"
-# split_image(image_path)
-# for root, _, files in os.walk("split_images"):
-#     for file in files:
-#         image_path = os.path.join(root, file)
-#         process_image(image_path)
-# del_group_dir("split_images")
+def recognized(images_path):
+    for root, _, files in os.walk(images_path):
+        count = len(files)
+        start_time = time()
+        for file in files:
+            image_path = os.path.join(root, file)
+            process_image(image_path)
+        end_time = time() - start_time
+        print(f"faces reconhecidas por minuto {count/(end_time/60)}")
+        print(f"Tempo para reconhecer as faces gerais: {time() - start_time:.2f} segundos")
+        break
+    

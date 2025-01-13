@@ -29,6 +29,7 @@ Thumbs.db
 *.cache
 *.pickle
 *.pkl
+*.csv
 
 # Dependências geradas por Poetry ou Pipenv 
 poetry.lock
@@ -45,3 +46,6 @@ cluster/
 9At/
 faces_recognizeds/
 teste_reconhecimento/
+imagens_to_recognized/
+points/
+sort_faces_recognizeds/

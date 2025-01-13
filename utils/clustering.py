@@ -25,14 +25,14 @@ def cluster_images(features: np.array) -> np.array:
         if len(features) == 0:
             raise ValueError("Nenhum recurso foi fornecido para clustering.")
         
-        kmeans = KMeans(n_clusters=25, random_state=42)
+        kmeans = KMeans(n_clusters=2, random_state=42)
         kmeans.fit(features)
         return kmeans.labels_
     except Exception as e:
         print(f"Erro ao realizar clustering: {e}")
         return np.array([])
 
-def group_faces(base_dir):
+def grouping_faces(base_dir):
     try:
         images = load_images(base_dir)
         if images.size == 0:

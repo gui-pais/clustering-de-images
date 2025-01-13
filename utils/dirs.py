@@ -2,7 +2,22 @@ import os
 import shutil
 import cv2
 import numpy as np
+import shutil
 
+
+def sort_files(base_dir="faces_recognizeds", output_dir="sort_faces_recognizeds"):
+    os.makedirs(output_dir, exist_ok=True)
+
+    for file in os.listdir(base_dir):
+        label = file.split('.')[0].split('_')[0]
+        label_dir = os.path.join(output_dir, label)
+        os.makedirs(label_dir, exist_ok=True)
+
+        source_path = os.path.join(base_dir, file)
+        dest_path = os.path.join(label_dir, file)
+        
+        if os.path.isfile(source_path):
+            shutil.copy(source_path, dest_path)
 
 def del_group_dir(dir_name):
     cluster_dir = os.path.abspath(dir_name)
@@ -18,7 +33,6 @@ def del_group_dir(dir_name):
 
 def make_groups_dir(images, labels):
     try:
-        del_group_dir("cluster")
         os.makedirs("cluster", exist_ok=True)
         cluster_dir = os.path.abspath("cluster")
         unique_labels = set(labels)
