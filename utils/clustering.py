@@ -20,19 +20,19 @@ def detect_faces(imgs: np.array) -> np.array:
         return np.array([])
 
 
-def cluster_images(features: np.array) -> np.array:
+def cluster_images(features: np.array, n_clusters) -> np.array:
     try:
         if len(features) == 0:
             raise ValueError("Nenhum recurso foi fornecido para clustering.")
         
-        kmeans = KMeans(n_clusters=2, random_state=42)
+        kmeans = KMeans(n_clusters=n_clusters, random_state=1)
         kmeans.fit(features)
         return kmeans.labels_
     except Exception as e:
         print(f"Erro ao realizar clustering: {e}")
         return np.array([])
 
-def grouping_faces(base_dir):
+def grouping_faces(base_dir, n_clusters, name):
     try:
         images = load_images(base_dir)
         if images.size == 0:
@@ -42,10 +42,10 @@ def grouping_faces(base_dir):
         if features.size == 0:
             raise ValueError("Nenhuma característica foi extraída.")
         
-        labels = cluster_images(features)
+        labels = cluster_images(features, n_clusters)
         if labels.size == 0:
             raise ValueError("Nenhum agrupamento foi realizado.")
         
-        make_groups_dir(images, labels)
+        make_groups_dir(images, labels, name)
     except Exception as e:
         print(f"Erro no agrupamento de rostos: {e}")
