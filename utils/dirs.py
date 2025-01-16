@@ -15,21 +15,22 @@ def del_group_dir(dir_name):
         print(f"O diretório {cluster_dir} não existe.")
 
 
-def make_groups_dir(images, labels, name):
+# def make_groups_dir(images, labels, name):
+def make_groups_dir(images, labels):
     try:
         os.makedirs("cluster", exist_ok=True)
         cluster_dir = os.path.abspath("cluster")
         unique_labels = set(labels)
         
         for label in unique_labels:
-            cluster_path = os.path.join(cluster_dir, f"{name} {label}")
+            cluster_path = os.path.join(cluster_dir, f"{label}")
             os.makedirs(cluster_path, exist_ok=True)
         
-        for img, label in zip(images, labels):
-            cluster_path = os.path.join(cluster_dir, f"{name}{label}")
-            img_path = os.path.join(cluster_path, f"{name}.jpg")
+        for idx, (img, label) in enumerate(zip(images, labels)):
+            cluster_path = os.path.join(cluster_dir, f"{label}")
+            img_path = os.path.join(cluster_path, f"{idx}.jpg")
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(img_path, (img).astype(np.uint8), )
+            cv2.imwrite(img_path, (img).astype(np.uint8))
         
         print("Imagens agrupadas e salvas com sucesso.")
     except Exception as e:

@@ -44,7 +44,7 @@ def save_cropped_faces(image, persons_recognized, output_dir="faces_recognizeds"
         os.makedirs(output_dir, exist_ok=True)
         
         for i, (name, face) in enumerate(persons_recognized.items(), start=1):
-            path = os.path.join(output_dir, name.split('_')[0])
+            path = os.path.join(output_dir, name.split(".")[0])
             os.makedirs(path, exist_ok=True)
             (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
             cropped_face = image[y:y+h, x:x+w]

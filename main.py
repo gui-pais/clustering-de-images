@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+import cv2
+import numpy as np
 from utils.clustering import grouping_faces
 from utils.detector_factory import DetectorFactory
 from time import time
@@ -9,8 +11,8 @@ from utils.dirs import del_group_dir
 import pandas as pd
 from streamlit_option_menu import option_menu
 
-detector = DetectorFactory.create_detector('dlib', predictor_model="media\shape_predictor_68_face_landmarks.dat", model_describer="media\dlib_face_recognition_resnet_model_v1.dat", threshold=0.588888888888888)
-# detector = DetectorFactory.create_detector('retina', threshold=0.588888888888888)
+detector = DetectorFactory.create_detector('dlib', predictor_model="media\shape_predictor_68_face_landmarks.dat", model_describer="media\dlib_face_recognition_resnet_model_v1.dat", threshold=0.588888888888888888)
+# detector = DetectorFactory.create_detector("retina", model_name="ArcFace", detector_backend="retinaface")
 
 def recognized_face():
     st.title("Reconhecimento facial")
@@ -74,7 +76,7 @@ def recognized_face():
             with col1:
                 if os.path.exists(faces_recognized):
                     image = Image.open(faces_recognized)
-                    st.image(image, width=100)
+                    st.image(image, caption=image.filename, width=100)
             with col2:
                 if os.path.exists(faces_to):
                     image = Image.open(faces_to)
@@ -174,14 +176,14 @@ def grouping():
     st.info("Certifique-se de ter feito o reconhecimento facial para agrupar os rostos.")
     if st.button("Agrupar rostos"):
         sart_time = time()
-        for file in os.listdir("faces_recognizeds"):
-            path = os.path.join("faces_recognizeds", file)                                    
-            grouping_faces(path, 2, file)
+        # for file in os.listdir("faces_recognizeds"):
+        #     path = os.path.join("faces_recognizeds", file)                                    
+        grouping_faces("faces_recognizeds")
         execution_time = time() - sart_time
         st.success(f"Agrupamento realizado com sucesso! Tempo de execução: {execution_time:.2f} segundos")
         st.write("Imagens agrupadas:")
         for i, label in enumerate(os.listdir("cluster")):
-            st.subheader(f"Grupo {i + 1}")
+            st.subheader(f"{label} {i + 1}")
             cluster_path = os.path.join("cluster", label)
             images_in_group = os.listdir(cluster_path)
 

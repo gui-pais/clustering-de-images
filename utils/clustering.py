@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
 from keras_facenet import FaceNet
 from utils.processing import load_images
 from utils.dirs import make_groups_dir
@@ -20,19 +20,32 @@ def detect_faces(imgs: np.array) -> np.array:
         return np.array([])
 
 
-def cluster_images(features: np.array, n_clusters) -> np.array:
+def cluster_images(features: np.array) -> np.array:
     try:
         if len(features) == 0:
             raise ValueError("Nenhum recurso foi fornecido para clustering.")
         
-        kmeans = KMeans(n_clusters=n_clusters, random_state=1)
-        kmeans.fit(features)
-        return kmeans.labels_
+        # clt = AgglomerativeClustering(
+        # n_clusters=None,
+        # distance_threshold=0.6,
+        # metric="cosine",
+        # linkage="complete",
+        # )
+        
+        clt = AgglomerativeClustering(
+            n_clusters=28,
+            linkage="complete",
+            metric="cosine"
+        )
+        
+        clt.fit(features)
+        return clt.labels_
+    
     except Exception as e:
         print(f"Erro ao realizar clustering: {e}")
         return np.array([])
 
-def grouping_faces(base_dir, n_clusters, name):
+def grouping_faces(base_dir):
     try:
         images = load_images(base_dir)
         if images.size == 0:
@@ -42,10 +55,10 @@ def grouping_faces(base_dir, n_clusters, name):
         if features.size == 0:
             raise ValueError("Nenhuma característica foi extraída.")
         
-        labels = cluster_images(features, n_clusters)
+        labels = cluster_images(features)
         if labels.size == 0:
             raise ValueError("Nenhum agrupamento foi realizado.")
         
-        make_groups_dir(images, labels, name)
+        make_groups_dir(images, labels)
     except Exception as e:
         print(f"Erro no agrupamento de rostos: {e}")

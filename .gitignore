@@ -30,6 +30,8 @@ Thumbs.db
 *.pickle
 *.pkl
 *.csv
+resultados gerais c cluster.txt
+resultados gerais teste c 15 imagens.txt
 
 # Dependências geradas por Poetry ou Pipenv 
 poetry.lock
