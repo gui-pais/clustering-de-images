@@ -39,16 +39,24 @@ def split_image(image_path, output_dir="split_images"):
     except Exception as e:
         raise ValueError(f"Erro ao dividir a imagem: {e}")
     
-def save_cropped_faces(image, persons_recognized, output_dir="faces_recognizeds"):
+def save_cropped_faces(image, persons_recognized, file_name,output_dir="faces_recognizeds", ):
     try:
         os.makedirs(output_dir, exist_ok=True)
         
-        for i, (name, face) in enumerate(persons_recognized.items(), start=1):
-            path = os.path.join(output_dir, name.split(".")[0])
-            os.makedirs(path, exist_ok=True)
+        for i, (_, face) in enumerate(persons_recognized.items(), start=1):
             (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
             cropped_face = image[y:y+h, x:x+w]
-            output_path = os.path.join(path, f"{name}_{i}.jpg")
+            first = file_name.split(" ")[0]
+            try:
+                second = file_name.split(" ")[1]
+                if second.endswith(".jpg"):
+                    second = second.split(".")[0]
+                first = f"{first} {second}"
+            except:
+                pass
+            if first.endswith(".jpg"):
+                first = first.split(".")[0]
+            output_path = os.path.join(output_dir, f"{first}_{i}.jpg")
             cv2.imwrite(output_path, cropped_face)
     except Exception as e:
         raise ValueError(f"Erro ao salvar faces recortadas: {e}")

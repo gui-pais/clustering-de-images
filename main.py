@@ -11,7 +11,7 @@ from utils.dirs import del_group_dir
 import pandas as pd
 from streamlit_option_menu import option_menu
 
-detector = DetectorFactory.create_detector('dlib', predictor_model="media\shape_predictor_68_face_landmarks.dat", model_describer="media\dlib_face_recognition_resnet_model_v1.dat", threshold=0.588888888888888888)
+detector = DetectorFactory.create_detector('dlib', predictor_model="media\shape_predictor_68_face_landmarks.dat", model_describer="media\dlib_face_recognition_resnet_model_v1.dat", threshold=0.588888888888888)
 # detector = DetectorFactory.create_detector("retina", model_name="ArcFace", detector_backend="retinaface")
 
 def recognized_face():
@@ -65,57 +65,39 @@ def recognized_face():
 
     if st.session_state.recognition_done:
         st.subheader("Tabelamento:")
+        csv_data = []
+
         for idx, data in enumerate(st.session_state.recognized_data):
             label_faces_subheader = data["label"]
             faces_recognized = data["faces_recognized"]
             faces_to = data["faces_to"]
 
             st.subheader(f"{label_faces_subheader}")
-            col1, col2, col3 = st.columns([2, 2, 1])
+            col1, col2 = st.columns([2, 2])
+
+            writer_entry = {"recog": None, "correct": None}
 
             with col1:
                 if os.path.exists(faces_recognized):
                     image = Image.open(faces_recognized)
-                    st.image(image, caption=image.filename, width=100)
+                    st.image(image, caption=os.path.basename(image.filename), width=100)
+                    writer_entry["recog"] = os.path.splitext(os.path.basename(image.filename))[0]
+
             with col2:
                 if os.path.exists(faces_to):
                     image = Image.open(faces_to)
-                    st.image(image, width=250)
-            with col3:
-                st.write("Imagem está correta?")
-                if f"correct_{label_faces_subheader}{idx}" not in st.session_state:
-                    st.session_state[f"correct_{label_faces_subheader}{idx}"] = None
+                    st.image(image, caption=os.path.basename(image.filename), width=250)
+                    writer_entry["correct"] = os.path.splitext(os.path.basename(image.filename))[0]
 
-                st.session_state[f"correct_{label_faces_subheader}{idx}"] = st.radio(
-                    "Escolha uma opção:",
-                    options=["Não Avaliado", "Sim", "Não"],
-                    index=0,
-                    key=f"radio_{label_faces_subheader}{idx}"
-                )
-
-    if st.session_state.recognition_done and st.button("Salvar dados"):
-        data_to_save = [
-            {
-                "label": data["label"],
-                "correct": (
-                    1 if st.session_state.get(f"correct_{data['label']}{idx}") == "Sim"
-                    else 0 if st.session_state.get(f"correct_{data['label']}{idx}") == "Não"
-                    else None
-                )
-            }
-            for idx, data in enumerate(st.session_state.recognized_data)
-        ]
+            csv_data.append(writer_entry)
 
         csv_file = 'data.csv'
         with open(csv_file, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=["label", "correct"])
+            writer = csv.DictWriter(f, fieldnames=["recog", "correct"])
             writer.writeheader()
-            writer.writerows(data_to_save)
+            writer.writerows(csv_data)
 
-        st.success(f"Dados gravados no arquivo CSV com sucesso!")
-        del_group_dir("imagens_to_recognized")
-        del_group_dir("faces_recognizeds")
-        st.session_state.clear()
+        st.success(f"Dados salvos em {csv_file}")
         
 def show_results():
     csv_file = 'data.csv'
@@ -125,45 +107,42 @@ def show_results():
             reader = csv.DictReader(f)
             for row in reader:
                 data.append({
-                    "label": row["label"],
-                    "correct": int(row["correct"])
+                    "recog": row["recog"],
+                    "correct": row["correct"]
                 })
-                
+
         results = {}
         total_correct = 0
         total_incorrect = 0
 
         for row in data:
-            label = row["label"]
+            recog = row["recog"]
             correct = row["correct"]
-            if label not in results:
-                results[label] = {"correct": 0, "incorrect": 0}
-            if correct == 1:
-                results[label]["correct"] += 1
+            if recog not in results:
+                results[recog] = {"correct": 0, "incorrect": 0}
+            if recog.split("_")[0] in correct:
+                results[recog]["correct"] += 1
                 total_correct += 1
             else:
-                results[label]["incorrect"] += 1
+                results[recog]["incorrect"] += 1
                 total_incorrect += 1
 
         results_df = pd.DataFrame([
-            {"Nome": label, "Acertos": counts["correct"], "Erros": counts["incorrect"]}
-            for label, counts in results.items()
+            {"Nome": recog, "Acertos": counts["correct"], "Erros": counts["incorrect"]}
+            for recog, counts in results.items()
         ])
 
         total_responses = total_correct + total_incorrect
-        if total_responses > 0:
-            percent_correct = (total_correct / total_responses) * 100
-            percent_incorrect = (total_incorrect / total_responses) * 100
-        else:
-            percent_correct = 0
-            percent_incorrect = 0
+        percent_correct = (total_correct / total_responses) * 100 if total_responses > 0 else 0
+        percent_incorrect = (total_incorrect / total_responses) * 100 if total_responses > 0 else 0
 
-        summary_row = {
+        summary_row = pd.DataFrame([{
             "Nome": "Total Geral",
             "Acertos": f"{percent_correct:.2f}%",
             "Erros": f"{percent_incorrect:.2f}%"
-        }
-        results_df = pd.concat([results_df, pd.DataFrame([summary_row])], ignore_index=True)
+        }])
+
+        results_df = pd.concat([results_df, summary_row], ignore_index=True)
 
         st.title("Resultados Gerais")
         st.subheader("Taxas de acertos e erros para o reconhecimento facial gerado.")

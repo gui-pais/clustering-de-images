@@ -74,7 +74,7 @@ class DlibDetector(IDetector):
                     recognized_faces = load("recognized_faces_dlib")
                     image = get_valid_image(image_path)
                     persons_recognized = self._predict(image, recognized_faces)
-                    save_cropped_faces(image, persons_recognized)
+                    save_cropped_faces(image, persons_recognized, file)
                 except Exception as e:
                     print(f"Erro ao processar {file}: {e}")
             print(f"Tempo total: {time() - start_time:.2f} segundos")
