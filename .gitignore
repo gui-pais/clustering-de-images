@@ -42,12 +42,10 @@ Pipfile.lock
 .env.*
 instance/
 
-# imagem de exemplo
+# imagens
 faces/
 cluster/
-9At/
-faces_recognizeds/
-teste_reconhecimento/
-imagens_to_recognized/
-points/
-sort_faces_recognizeds/
+recognized/
+uploads/
+super_resolution/
+output/

@@ -1,20 +1,14 @@
 import streamlit as st
 import os
-import cv2
-import numpy as np
-from utils.clustering import grouping_faces
-from utils.detector_factory import DetectorFactory
 from time import time
 import csv
 from PIL import Image
-from utils.dirs import del_group_dir
 import pandas as pd
 from streamlit_option_menu import option_menu
+from utils.pipeline import pipeline
 
-detector = DetectorFactory.create_detector('dlib', predictor_model="media\shape_predictor_68_face_landmarks.dat", model_describer="media\dlib_face_recognition_resnet_model_v1.dat", threshold=0.588888888888888)
-# detector = DetectorFactory.create_detector("retina", model_name="ArcFace", detector_backend="retinaface")
 
-def recognized_face():
+def recognized():
     st.title("Reconhecimento facial")
     st.write("Faça o upload de múltiplas imagens para realizar o reconhecimento facial")
 
@@ -29,23 +23,21 @@ def recognized_face():
 
     if uploaded_files:
         st.session_state.uploaded_files = uploaded_files
-        os.makedirs("imagens_to_recognized", exist_ok=True)
-        os.makedirs("faces_recognizeds", exist_ok=True)
 
         for file in uploaded_files:
-            with open(os.path.join("imagens_to_recognized", file.name), "wb") as f:
+            with open(os.path.join("uploads", file.name), "wb") as f:
                 f.write(file.getbuffer())
 
     if st.button("Realizar o reconhecimento") and st.session_state.uploaded_files:
         start_time = time()
-        detector.run("imagens_to_recognized")
+        pipeline()
         execution_time = time() - start_time
         st.success(f"Reconhecimento realizado com sucesso! Tempo de execução: {execution_time:.2f} segundos")
 
         st.session_state.recognition_done = True
 
         recognized_data = []
-        for root, _ , files in os.walk("faces_recognizeds"):
+        for root, _ , files in os.walk("output"):
             for label_faces in files:
                 label_faces_subheader = label_faces.split(".")[0]
                 for label in os.listdir("faces"):
@@ -56,7 +48,7 @@ def recognized_face():
                         if os.path.exists(image_path_test):
                             recognized_data.append({
                                 "label": label_faces_subheader,
-                                "faces_recognized": os.path.join(root, label_faces),
+                                "output": os.path.join(root, label_faces),
                                 "faces_to": image_path_test
                             })
                             break
@@ -69,7 +61,7 @@ def recognized_face():
 
         for idx, data in enumerate(st.session_state.recognized_data):
             label_faces_subheader = data["label"]
-            faces_recognized = data["faces_recognized"]
+            output = data["output"]
             faces_to = data["faces_to"]
 
             st.subheader(f"{label_faces_subheader}")
@@ -78,8 +70,8 @@ def recognized_face():
             writer_entry = {"recog": None, "correct": None}
 
             with col1:
-                if os.path.exists(faces_recognized):
-                    image = Image.open(faces_recognized)
+                if os.path.exists(output):
+                    image = Image.open(output)
                     st.image(image, caption=os.path.basename(image.filename), width=100)
                     writer_entry["recog"] = os.path.splitext(os.path.basename(image.filename))[0]
 
@@ -150,31 +142,11 @@ def show_results():
     else:
         st.warning("O arquivo `data.csv` não foi encontrado. Por favor, execute o processo de reconhecimento primeiro.")
 
-def grouping():
-    st.title("Agrupamento de rostos")
-    st.info("Certifique-se de ter feito o reconhecimento facial para agrupar os rostos.")
-    if st.button("Agrupar rostos"):
-        sart_time = time()
-        # for file in os.listdir("faces_recognizeds"):
-        #     path = os.path.join("faces_recognizeds", file)                                    
-        grouping_faces("faces_recognizeds")
-        execution_time = time() - sart_time
-        st.success(f"Agrupamento realizado com sucesso! Tempo de execução: {execution_time:.2f} segundos")
-        st.write("Imagens agrupadas:")
-        for i, label in enumerate(os.listdir("cluster")):
-            st.subheader(f"{label} {i + 1}")
-            cluster_path = os.path.join("cluster", label)
-            images_in_group = os.listdir(cluster_path)
-
-            for image_file in images_in_group:
-                image_path = os.path.join(cluster_path, image_file)
-                st.image(image_path, caption=image_file, width=200)
-
 def main():
     menu = option_menu(
         menu_title="",
-        options=["Reconhecimento Facial", "Visualizar Resultados", "Agrupamento de Rostos"],
-        icons=["camera", "graph-up", "people"],
+        options=["Reconhecimento Facial", "Visualizar Resultados"],
+        icons=["camera", "graph-up"],
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
@@ -187,12 +159,9 @@ def main():
 
     match menu:
         case "Reconhecimento Facial":
-            recognized_face()
+            recognized()
         case "Visualizar Resultados":
             show_results()     
-        case "Agrupamento de Rostos":
-            grouping()
 
 if __name__ == "__main__":
-    # detector.extract_faces()
     main()
