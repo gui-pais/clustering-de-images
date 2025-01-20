@@ -59,7 +59,7 @@ def recognized():
         st.subheader("Tabelamento:")
         csv_data = []
 
-        for idx, data in enumerate(st.session_state.recognized_data):
+        for data in st.session_state.recognized_data:
             label_faces_subheader = data["label"]
             output = data["output"]
             faces_to = data["faces_to"]
@@ -145,8 +145,8 @@ def show_results():
 def main():
     menu = option_menu(
         menu_title="",
-        options=["Reconhecimento Facial", "Visualizar Resultados"],
-        icons=["camera", "graph-up"],
+        options=["Reconhecimento Facial"],
+        icons=["camera"],
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
@@ -159,9 +159,7 @@ def main():
 
     match menu:
         case "Reconhecimento Facial":
-            recognized()
-        case "Visualizar Resultados":
-            show_results()     
+            recognized()    
 
 if __name__ == "__main__":
     main()

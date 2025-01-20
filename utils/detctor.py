@@ -5,6 +5,7 @@ import numpy as np
 from .cache import save, load
 from .image import get_valid_image, save_cropped_faces
 import subprocess
+from time import time
 
 class Detector():
     def __init__(self, predictor_model: str, model_describer: str, threshold: float = 0.6):
@@ -16,10 +17,13 @@ class Detector():
     def _predict(self, image: np.ndarray, recognized_faces: dict) -> dict:
         persons_recognized = {}
         try:
+            start = time()
             faces = self._detector(image, 1)
+            print(f"Tempo para reconhecer todas as faces: {time() - start }")
             recognized_faces_copy = recognized_faces.copy()
 
             for face in faces:
+                start = time()
                 points = self._predictor(image, face)
                 desc = self._describer.compute_face_descriptor(image, points)
                 desc = np.array(desc, dtype=np.float64)[np.newaxis, :]
@@ -31,19 +35,24 @@ class Detector():
                 if np.linalg.norm(desc - recognized_faces_copy[name]) < self._threshold:
                     del recognized_faces_copy[name]
                     persons_recognized[name.lower().capitalize()] = face
+                    print(f"Tempo para comparar e reconhecer a {name}: {time() - start}")
             return persons_recognized
         except Exception as e:
             raise ValueError(f"Erro ao realizar predição: {e}")
 
     def run(self, images_path: str, output_path: str):
+        start = time()
+        rec_faces = load("rec_faces_dlib")
+        print(f"Tempo para carregar os embeddings: {time() - start}")
         for root, _, files in os.walk(images_path):
             for file in files:
                 image_path = os.path.join(root, file)
                 try:
-                    rec_faces = load("rec_faces_dlib")
+                    start = time()
                     image = get_valid_image(image_path)
                     embeddings_face = self._predict(image, rec_faces)
                     save_cropped_faces(image, embeddings_face, output_dir=output_path)
+                    print(f"Tempo para executar para a imagem {image_path}: {time() - start}")
                 except Exception as e:
                     print(f"Erro ao processar {file}: {e}")
 
