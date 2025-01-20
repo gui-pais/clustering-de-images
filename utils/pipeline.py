@@ -6,20 +6,21 @@ def pipeline(bat="GFPGAN.bat"):
     start = time()
     predictor_model = "media/shape_predictor_68_face_landmarks.dat"
     model_describer = "media/dlib_face_recognition_resnet_model_v1.dat"
-    threshold = 0.588888888888888
+    threshold_super_resolution = 0.62222222222222222222
+    threshold_detector = 0.55555555555555555555555555
     
     super_resolution = DetectorFactory.create_detector(
         "super_resolution", 
         predictor_model=predictor_model, 
         model_describer=model_describer, 
-        threshold=threshold
+        threshold=threshold_super_resolution
         )
     
     detector = DetectorFactory.create_detector(
         'dlib', 
         predictor_model=predictor_model, 
         model_describer=model_describer, 
-        threshold=threshold
+        threshold=threshold_detector
         )
     
     if not os.path.exists("rec_faces_dlib.pkl"):
