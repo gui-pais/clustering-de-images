@@ -1,13 +1,13 @@
 import os
 import shutil
 
-def del_group_dir(dir_name):
-    cluster_dir = os.path.abspath(dir_name)
-    if os.path.exists(cluster_dir):
+def delete_directory(directory_name):
+    directory_path = os.path.abspath(directory_name)
+    if os.path.exists(directory_path):
         try:
-            shutil.rmtree(cluster_dir) 
-            print(f"Diretório {cluster_dir} e seu conteúdo foram excluídos com sucesso.")
+            shutil.rmtree(directory_path)
+            print(f"Directory {directory_path} and its contents were successfully deleted.")
         except Exception as e:
-            print(f"Erro ao excluir o diretório {cluster_dir}: {e}")
+            print(f"Error deleting directory {directory_path}: {e}")
     else:
-        print(f"O diretório {cluster_dir} não existe.")
+        print(f"Directory {directory_path} does not exist.")

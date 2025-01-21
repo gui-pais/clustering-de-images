@@ -2,19 +2,19 @@ from .detctor import *
 
 class DetectorFactory:
     @staticmethod
-    def create_detector(detector_type: str, **kwargs) -> Detector:
+    def create_detector(detector_type: str, **kwargs) -> FaceDetector:
+        predictor_model_path = kwargs.get("predictor_model_path")
+        face_recognition_model_path = kwargs.get("face_recognition_model_path")
+        similarity_threshold = kwargs.get("similarity_threshold", 0.6)
         
-        predictor_model = kwargs.get("predictor_model")
-        model_describer = kwargs.get("model_describer")
-        threshold = kwargs.get("threshold")
-        if not predictor_model or not model_describer:
-            raise ValueError("Modelos de predição e descrição são necessários para o DlibDetector.")
+        if not predictor_model_path or not face_recognition_model_path:
+            raise ValueError("Both predictor and face recognition models are required.")
         
         match detector_type:
             case "dlib":
-                return DlibDetector(predictor_model, model_describer, threshold)
+                return DlibFaceDetector(predictor_model_path, face_recognition_model_path, similarity_threshold)
 
             case "super_resolution":
-                return SuperResolutionDetector(predictor_model, model_describer, threshold)
+                return SuperResolutionFaceDetector(predictor_model_path, face_recognition_model_path, similarity_threshold)
             case _:
-                raise ValueError(f"Tipo de detector desconhecido: {detector_type}")
+                raise ValueError(f"Unknown detector type: {detector_type}")

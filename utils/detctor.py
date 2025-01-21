@@ -2,93 +2,91 @@ import os
 import cv2
 import dlib
 import numpy as np
-from .cache import save, load
-from .image import get_valid_image, save_cropped_faces
 import subprocess
-from time import time
+from .cache import save_data, load_data
+from .image import load_image, save_cropped_faces
 
-class Detector():
-    def __init__(self, predictor_model: str, model_describer: str, threshold: float = 0.6):
-        self._detector = dlib.get_frontal_face_detector()
-        self._predictor = dlib.shape_predictor(predictor_model)
-        self._describer = dlib.face_recognition_model_v1(model_describer)
-        self._threshold = threshold
+class FaceDetector:
+    def __init__(self, predictor_model_path: str, face_recognition_model_path: str, similarity_threshold: float = 0.6):
+        self.face_detector = dlib.get_frontal_face_detector()
+        self.shape_predictor = dlib.shape_predictor(predictor_model_path)
+        self.face_recognizer = dlib.face_recognition_model_v1(face_recognition_model_path)
+        self.similarity_threshold = similarity_threshold
 
-    def _predict(self, image: np.ndarray, recognized_faces: dict) -> dict:
-        persons_recognized = {}
+    def _resize_image(self, image: np.ndarray, target_width: int) -> np.ndarray:
+        target_height = int(image.shape[0] * (target_width / image.shape[1]))
+        return cv2.resize(image, (target_width, target_height))
+
+    def _recognize_faces(self, image: np.ndarray, known_faces: dict) -> dict:
+        recognized_faces = {}
         try:
-            start = time()
-            faces = self._detector(image, 1)
-            print(f"Tempo para reconhecer todas as faces: {time() - start }")
-            recognized_faces_copy = recognized_faces.copy()
+            detected_faces = self.face_detector(image, 1)
+            known_faces_copy = known_faces.copy()
 
-            for face in faces:
-                start = time()
-                points = self._predictor(image, face)
-                desc = self._describer.compute_face_descriptor(image, points)
-                desc = np.array(desc, dtype=np.float64)[np.newaxis, :]
-                min_index = np.argmin([
-                    np.linalg.norm(desc - descriptor)
-                    for descriptor in recognized_faces_copy.values()
-                ])
-                name = list(recognized_faces_copy.keys())[min_index]
-                if np.linalg.norm(desc - recognized_faces_copy[name]) < self._threshold:
-                    del recognized_faces_copy[name]
-                    persons_recognized[name.lower().capitalize()] = face
-                    print(f"Tempo para comparar e reconhecer a {name}: {time() - start}")
-            return persons_recognized
+            for detected_face in detected_faces:
+                facial_landmarks = self.shape_predictor(image, detected_face)
+                face_descriptor = np.array(self.face_recognizer.compute_face_descriptor(image, facial_landmarks), dtype=np.float64)[np.newaxis, :]
+
+                distances = [np.linalg.norm(face_descriptor - known_descriptor) for known_descriptor in known_faces_copy.values()]
+                min_index = np.argmin(distances)
+                match_name = list(known_faces_copy.keys())[min_index]
+
+                if distances[min_index] < self.similarity_threshold:
+                    del known_faces_copy[match_name]
+                    recognized_faces[match_name.lower().capitalize()] = detected_face
+
+            return recognized_faces
         except Exception as e:
-            raise ValueError(f"Erro ao realizar predição: {e}")
+            raise ValueError(f"Error during face recognition: {e}")
 
-    def run(self, images_path: str, output_path: str):
-        start = time()
-        rec_faces = load("rec_faces_dlib")
-        print(f"Tempo para carregar os embeddings: {time() - start}")
-        for root, _, files in os.walk(images_path):
+    def process_images(self, input_directory: str, output_directory: str):
+        known_faces = load_data("rec_faces_dlib")
+        for root, _, files in os.walk(input_directory):
             for file in files:
                 image_path = os.path.join(root, file)
                 try:
-                    start = time()
-                    image = get_valid_image(image_path)
-                    embeddings_face = self._predict(image, rec_faces)
-                    save_cropped_faces(image, embeddings_face, output_dir=output_path)
-                    print(f"Tempo para executar para a imagem {image_path}: {time() - start}")
-                except Exception as e:
-                    print(f"Erro ao processar {file}: {e}")
-
-
-class SuperResolutionDetector(Detector):
-    def __init__(self, predictor_model: str, model_describer: str, threshold: float = 0.6):
-        super().__init__(predictor_model=predictor_model, model_describer=model_describer, threshold=threshold)
-
-    def run(self, images_path: str, output_path: str, bat):
-        super().run(images_path, output_path)
-        subprocess.call(bat, shell=True)
-
-class DlibDetector(Detector):
-    def __init__(self, predictor_model: str, model_describer: str, threshold:float = 0.6):
-        super().__init__(predictor_model=predictor_model, model_describer=model_describer, threshold=threshold)
-        
-    def run(self, images_path, output_path):
-        return super().run(images_path, output_path)
-                    
-    def extract_faces(self, group_dir="faces"):
-        rec_faces = {}
-        try:
-            if os.path.exists(group_dir):
-                for file in os.listdir(group_dir):
-                    name = file.split(".")[0]
-                    image_path = os.path.join(group_dir, file)
-                    image = cv2.imread(image_path)
+                    image = load_image(image_path)
                     if image is None:
                         continue
-                    faces = self._detector(image, 1)
-                    if faces is None:
+
+                    detected_faces = self._recognize_faces(image, known_faces)
+                    save_cropped_faces(image, detected_faces, output_dir=output_directory)
+
+                except Exception as e:
+                    print(f"Error processing {file}: {e}")
+
+class SuperResolutionFaceDetector(FaceDetector):
+    def __init__(self, predictor_model_path: str, face_recognition_model_path: str, similarity_threshold: float = 0.6):
+        super().__init__(predictor_model_path, face_recognition_model_path, similarity_threshold)
+
+    def process_images(self, input_directory: str, output_directory: str, batch_command: str):
+        super().process_images(input_directory, output_directory)
+        subprocess.call(batch_command, shell=True)
+
+
+class DlibFaceDetector(FaceDetector):
+    def __init__(self, predictor_model_path: str, face_recognition_model_path: str, similarity_threshold: float = 0.6):
+        super().__init__(predictor_model_path, face_recognition_model_path, similarity_threshold)
+
+    def extract_known_faces(self, face_images_directory="faces"):
+        known_faces = {}
+        try:
+            if os.path.exists(face_images_directory):
+                for file in os.listdir(face_images_directory):
+                    face_name, _ = os.path.splitext(file)
+                    image_path = os.path.join(face_images_directory, file)
+                    image = load_image(image_path)
+                    if image is None:
                         continue
-                    for face in faces:
-                        shape = self._predictor(image, face)
-                        descriptor = self._describer.compute_face_descriptor(image, shape)
-                        rec_faces[name.lower().capitalize()] = np.array(descriptor, dtype=np.float64)[np.newaxis, :]
-            save(rec_faces, "rec_faces_dlib")
+
+                    resized_image = self._resize_image(image, target_width=150)
+                    detected_faces = self.face_detector(resized_image, 1)
+
+                    for detected_face in detected_faces:
+                        facial_landmarks = self.shape_predictor(resized_image, detected_face)
+                        face_descriptor = np.array(self.face_recognizer.compute_face_descriptor(resized_image, facial_landmarks), dtype=np.float64)[np.newaxis, :]
+                        known_faces[face_name.lower().capitalize()] = face_descriptor
+
+            save_data(known_faces, "rec_faces_dlib")
         except Exception as e:
-            raise ValueError(f"Erro ao criar faces reconhecidas: {e}")
+            raise ValueError(f"Error extracting known faces: {e}")

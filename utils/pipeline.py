@@ -2,32 +2,29 @@ import os
 from time import time
 from .detector_factory import DetectorFactory
 
-def pipeline(bat="GFPGAN.bat"):
-    start = time()
-    predictor_model = "media/shape_predictor_68_face_landmarks.dat"
-    model_describer = "media/dlib_face_recognition_resnet_model_v1.dat"
-    threshold_super_resolution = 0.62222222222222222222
-    threshold_detector = 0.55555555555555555555555555
-    
-    super_resolution = DetectorFactory.create_detector(
-        "super_resolution", 
-        predictor_model=predictor_model, 
-        model_describer=model_describer, 
-        threshold=threshold_super_resolution
-        )
-    
-    detector = DetectorFactory.create_detector(
-        'dlib', 
-        predictor_model=predictor_model, 
-        model_describer=model_describer, 
-        threshold=threshold_detector
-        )
-    
+def pipeline(batch_command="GFPGAN.bat"):
+    start_time = time()
+    predictor_model_path = "media/shape_predictor_68_face_landmarks.dat"
+    face_recognition_model_path = "media/dlib_face_recognition_resnet_model_v1.dat"
+
+    super_resolution_detector = DetectorFactory.create_detector(
+        "super_resolution",
+        predictor_model_path=predictor_model_path,
+        face_recognition_model_path=face_recognition_model_path,
+        similarity_threshold=0.59,
+    )
+
+    dlib_detector = DetectorFactory.create_detector(
+        "dlib",
+        predictor_model_path=predictor_model_path,
+        face_recognition_model_path=face_recognition_model_path,
+        similarity_threshold=0.54,
+    )
+
     if not os.path.exists("rec_faces_dlib.pkl"):
-        detector.extract_faces()
-        
-    super_resolution.run("uploads", "recognized", bat)
-    
-    detector.run(f"super_resolution/restored_faces", "output")
-    print(f"Tempo total para executar o algoritmo: {time() - start}")
+        dlib_detector.extract_known_faces()
+
+    super_resolution_detector.process_images("uploads", "recognized", batch_command)
+    dlib_detector.process_images("super_resolution/restored_faces", "output")
+    print(f"Total execution time: {time() - start_time}")
     

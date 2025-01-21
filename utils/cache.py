@@ -1,15 +1,15 @@
 import pickle
 
-def save(data,save_name):
+def save_data(data, filename):
     try:
-        with open(f'{save_name}.pkl', 'wb') as f:
-            pickle.dump(data, f)
+        with open(f'{filename}.pkl', 'wb') as file:
+            pickle.dump(data, file)
     except Exception as e:
-        raise ValueError(f"{e}")
+        raise ValueError(f"Error saving data: {e}")
 
-def load(file_name):
+def load_data(filename):
     try:
-        with open(f'{file_name}.pkl', 'rb') as f:
-            return pickle.load(f)
+        with open(f'{filename}.pkl', 'rb') as file:
+            return pickle.load(file)
     except Exception as e:
-        raise ValueError(f"{e}")
+        raise ValueError(f"Error loading data: {e}")
