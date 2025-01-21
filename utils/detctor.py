@@ -5,7 +5,7 @@ import hashlib
 import numpy as np
 import subprocess
 from .cache import save_data, load_data
-from .image import load_image, save_cropped_faces
+from .image import load_image, save_cropped_faces, draw_bounding_boxes
 
 class SharedMemory:
     _instance = None
@@ -13,8 +13,7 @@ class SharedMemory:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(SharedMemory, cls).__new__(cls)
-            cls._instance.processed_image = {}
-            cls._instance.iteration_cache = None
+            cls._instance.iteration_cache = []
             cls._instance.cache_index = 0
         return cls._instance
 
@@ -38,42 +37,44 @@ class FaceDetector:
             min_index = np.argmin(distances)
             match_name = list(known_faces.keys())[min_index]
             
-            print(f"Match name: {match_name}, distance: {distances[min_index]}")
-            
             return match_name, distances, min_index
-
-    def _recognize_faces(self, image: np.ndarray, known_faces: dict, iteration: int) -> dict:
         
+    def get_hash(self, image: np.ndarray) -> str:
+        arr_bytes = image.tobytes()
+        hash_object = hashlib.sha256(arr_bytes)
+        return hash_object.hexdigest()
+
+    def _recognize_faces(self, image_path: str, known_faces: dict, iteration: int) -> dict:
         recognized_faces = {}
         known_faces_copy = known_faces.copy()
         try:
-          
+            image = load_image(image_path)
+            if image is None:
+                raise ValueError(f"Unable to load image: {image_path}")
+            
             if iteration == 1:
                 detected_faces = self.face_detector(image, 1)
                 for detected_face in detected_faces:
                     match_name, distances, min_index = self._calculate_distances(known_faces_copy, image, detected_face)
-                
                     if distances[min_index] < self.similarity_threshold:
                         del known_faces_copy[match_name]
                         recognized_faces[match_name.lower().capitalize()] = detected_face
+                        bounding_boxes = (image_path, detected_face)
+                        print(bounding_boxes)
+                        self.memory._instance.iteration_cache.append(bounding_boxes)
             
+            elif iteration == 2:
+                print("cahce_index ",self.memory._instance.cache_index)
+                if len(self.memory._instance.iteration_cache) > self.memory._instance.cache_index:
+                    detected_face = dlib.rectangle(0, 0, image.shape[1], image.shape[0])
+                    print(image_path)
+                    match_name, distances, min_index = self._calculate_distances(known_faces_copy, image, detected_face)
+                    print("match_name ",match_name)
+                    print("teste", self.memory._instance.iteration_cache[self.memory._instance.cache_index])
+                    if distances[min_index] < self.similarity_threshold:
+                        recognized_faces[match_name.lower().capitalize()] = self.memory._instance.iteration_cache[self.memory._instance.cache_index]                       
+                    self.memory._instance.cache_index += 1
             
-            if iteration == 2:
-                self.memory._instance.iteration_cache = [os.path.join("recognized", file) for file in os.listdir("recognized")]
-                
-                arr_bytes = image.tobytes()
-                hash_object = hashlib.sha256(arr_bytes)
-                hash_hex = hash_object.hexdigest()
-                
-                self.memory._instance.processed_image[hash_hex] = self.memory._instance.iteration_cache[self.memory._instance.cache_index]
-                self.memory._instance.cache_index += 1
-                detected_face = dlib.rectangle(0, 0, image.shape[1], image.shape[0])
-                
-                match_name, distances, min_index = self._calculate_distances(known_faces_copy, image, detected_face)
-                
-                if distances[min_index] < self.similarity_threshold:       
-                    recognized_faces[match_name.lower().capitalize()] = self.memory._instance.processed_image[hash_hex]
-                        
             return recognized_faces
         except Exception as e:
             raise ValueError(f"Error during face recognition: {e}")
@@ -87,12 +88,11 @@ class FaceDetector:
                     image = load_image(image_path)
                     if image is None:
                         continue
-                    detected_faces = self._recognize_faces(image, known_faces, iteration)
+                    detected_faces = self._recognize_faces(image_path, known_faces, iteration)
                     if iteration == 2:
-                        save_cropped_faces(detected_faces, output_directory=output_directory)
-                    else:
+                        draw_bounding_boxes(detected_faces, output_directory=output_directory)
+                    elif iteration == 1:
                         save_cropped_faces(detected_faces, image=image, output_directory=output_directory)
-
                 except Exception as e:
                     print(f"Error processing {file}: {e}")
 

@@ -11,14 +11,14 @@ def pipeline(batch_command="GFPGAN.bat"):
         "super_resolution",
         predictor_model_path=predictor_model_path,
         face_recognition_model_path=face_recognition_model_path,
-        similarity_threshold=0.59,
+        similarity_threshold=0.6,
     )
 
     dlib_detector = DetectorFactory.create_detector(
         "dlib",
         predictor_model_path=predictor_model_path,
         face_recognition_model_path=face_recognition_model_path,
-        similarity_threshold=0.57,
+        similarity_threshold=0.59,
     )
 
     if not os.path.exists("rec_faces_dlib.pkl"):

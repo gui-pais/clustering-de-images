@@ -37,43 +37,19 @@ def recognized():
         recognized_data = []
         for root, _ , files in os.walk("output"):
             for label_faces in files:
-                label_faces_subheader = label_faces.split(".")[0]
-                for label in os.listdir("faces"):
-                    label_faces_subheader = label_faces_subheader.split("_")[0]
-                    label_subheader = label.split(".")[0]
-                    if label_faces_subheader.upper() in label_subheader.upper():
-                        image_path_test = os.path.join("faces", label)
-                        if os.path.exists(image_path_test):
-                            recognized_data.append({
-                                "label": label_faces_subheader,
-                                "output": os.path.join(root, label_faces),
-                                "faces_to": image_path_test
-                            })
-                            break
+                output = os.path.join(root, label_faces)
+                recognized_data.append({"output": output})
         
         st.session_state.recognized_data = recognized_data
 
     if st.session_state.recognition_done:
-        st.subheader("Tabelamento:")
 
         for data in st.session_state.recognized_data:
-            label_faces_subheader = data["label"]
             output = data["output"]
-            faces_to = data["faces_to"]
-
-            st.subheader(f"{label_faces_subheader}")
-            col1, col2 = st.columns([2, 2])
-
-            with col1:
-                if os.path.exists(output):
-                    image = Image.open(output)
-                    st.image(image, caption=os.path.basename(image.filename), width=100)
+            if os.path.exists(output):
+                image = Image.open(output)
+                st.image(image, caption=os.path.basename(image.filename), width=1000)
                     
-
-            with col2:
-                if os.path.exists(faces_to):
-                    image = Image.open(faces_to)
-                    st.image(image, caption=os.path.basename(image.filename), width=250)
                     
 def main():
     menu = option_menu(
