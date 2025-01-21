@@ -18,13 +18,13 @@ def pipeline(batch_command="GFPGAN.bat"):
         "dlib",
         predictor_model_path=predictor_model_path,
         face_recognition_model_path=face_recognition_model_path,
-        similarity_threshold=0.54,
+        similarity_threshold=0.57,
     )
 
     if not os.path.exists("rec_faces_dlib.pkl"):
         dlib_detector.extract_known_faces()
 
-    super_resolution_detector.process_images("uploads", "recognized", batch_command)
-    dlib_detector.process_images("super_resolution/restored_faces", "output")
+    super_resolution_detector.process_images("uploads", output_directory="recognized", iteration=1, batch_command=batch_command)
+    dlib_detector.process_images("super_resolution/restored_imgs", output_directory="output", iteration=2)
     print(f"Total execution time: {time() - start_time}")
     
