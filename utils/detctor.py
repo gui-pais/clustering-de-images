@@ -1,6 +1,7 @@
 import os
 import cv2
 import dlib
+import re
 import hashlib
 import numpy as np
 import subprocess
@@ -31,7 +32,7 @@ class FaceDetector:
     
     def _calculate_distances(self, known_faces: dict, image, detected_face) -> tuple:
             facial_landmarks = self.shape_predictor(image, detected_face)
-            face_descriptor = np.array(self.face_recognizer.compute_face_descriptor(image, facial_landmarks), dtype=np.float64)[np.newaxis, :]
+            face_descriptor = np.asarray(self.face_recognizer.compute_face_descriptor(image, facial_landmarks), dtype=np.float64)[np.newaxis, :]
 
             distances = [np.linalg.norm(face_descriptor - known_descriptor) for known_descriptor in known_faces.values()]
             min_index = np.argmin(distances)
@@ -58,22 +59,23 @@ class FaceDetector:
                     match_name, distances, min_index = self._calculate_distances(known_faces_copy, image, detected_face)
                     if distances[min_index] < self.similarity_threshold:
                         del known_faces_copy[match_name]
-                        recognized_faces[match_name.lower().capitalize()] = detected_face
+                        recognized_faces[match_name] = detected_face
                         bounding_boxes = (image_path, detected_face)
-                        print(bounding_boxes)
                         self.memory._instance.iteration_cache.append(bounding_boxes)
             
             elif iteration == 2:
                 print("cahce_index ",self.memory._instance.cache_index)
                 if len(self.memory._instance.iteration_cache) > self.memory._instance.cache_index:
                     detected_face = dlib.rectangle(0, 0, image.shape[1], image.shape[0])
-                    print(image_path)
+                    pattern = r"(\d+)"
+                    index_match = re.search(pattern, image_path)
+                    if index_match:
+                        self.memory._instance.cache_index = int(index_match.group(1)) - 1
                     match_name, distances, min_index = self._calculate_distances(known_faces_copy, image, detected_face)
                     print("match_name ",match_name)
                     print("teste", self.memory._instance.iteration_cache[self.memory._instance.cache_index])
                     if distances[min_index] < self.similarity_threshold:
                         recognized_faces[match_name.lower().capitalize()] = self.memory._instance.iteration_cache[self.memory._instance.cache_index]                       
-                    self.memory._instance.cache_index += 1
             
             return recognized_faces
         except Exception as e:
@@ -119,13 +121,11 @@ class DlibFaceDetector(FaceDetector):
                     image = load_image(image_path)
                     if image is None:
                         continue
-
-                    resized_image = self._resize_image(image, target_width=150)
-                    detected_faces = self.face_detector(resized_image, 1)
+                    detected_faces = self.face_detector(image, 1)
 
                     for detected_face in detected_faces:
-                        facial_landmarks = self.shape_predictor(resized_image, detected_face)
-                        face_descriptor = np.array(self.face_recognizer.compute_face_descriptor(resized_image, facial_landmarks), dtype=np.float64)[np.newaxis, :]
+                        facial_landmarks = self.shape_predictor(image, detected_face)
+                        face_descriptor = np.array(self.face_recognizer.compute_face_descriptor(image, facial_landmarks), dtype=np.float64)[np.newaxis, :]
                         known_faces[face_name.lower().capitalize()] = face_descriptor
 
             save_data(known_faces, "rec_faces_dlib")
