@@ -1,0 +1,50 @@
+clustering-de-images\output\20241030104000.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030104200.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030104309.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030104309.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030104600.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030104700.jpg - 3 identificações - 3 faces corretas
+clustering-de-images\output\20241030104800.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030105000.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030105101.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030105300.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030105500.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030105600.jpg - 2 identificações - 1 face correta - 1 face incorreta
+clustering-de-images\output\20241030105800.jpg - 4 identificações - 2 face correta - 2 face incorreta
+clustering-de-images\output\20241030105900.jpg - 3 identificações - 2 face correta - 1 face incorreta
+clustering-de-images\output\20241030110000.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030110100.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030110200.jpg - 3 identificações - 2 face correta - 1 face incorreta
+clustering-de-images\output\20241030110300.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030110400.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030110500.jpg - 3 identificações - 2 face correta - 1 face incorreta
+clustering-de-images\output\20241030110700.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030110900.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030111000.jpg - 2 identificações - 1 face correta - 1 face incorreta
+clustering-de-images\output\20241030111200.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030111300.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030111511.jpg - 2 identificações - 1 face correta - 1 face incorreta
+clustering-de-images\output\20241030111950.jpg - 2 identificações - 2 face incorreta
+clustering-de-images\output\20241030112010.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030112100.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030112200.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030112300.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241030112400.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030112600.jpg - 2 identificações - 1 face correta - 1 face incorreta
+clustering-de-images\output\20241030112800.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241030112900.jpg - 3 identificações - 1 face correta - 2 face incorreta
+clustering-de-images\output\20241127111026.jpg - 1 identificação - 1 face incorreta
+clustering-de-images\output\20241127111126.jpg - 2 identificações - 2 face incorreta
+clustering-de-images\output\20241127111227.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241127111328.jpg - 3 identificações - 1 face correta - 2 face incorreta
+clustering-de-images\output\20241127111429.jpg - 5 identificações - 2 face correta - 3 face incorreta
+clustering-de-images\output\20241127111530.jpg - 5 identificações - 1 face correta - 4 face incorreta
+clustering-de-images\output\20241127111630.jpg - 6 identificações - 5 face correta - 1 face incorreta
+clustering-de-images\output\20241127111730.jpg - 1 identificação - 1 face correta
+clustering-de-images\output\20241127111831.jpg - 3 identificações - 2 face correta - 1 face incorreta
+clustering-de-images\output\20241127111932.jpg - 5 identificações - 3 face correta - 2 face incorreta
+clustering-de-images\output\20241127112032.jpg - 2 identificações - 1 face correta - 1 face incorreta
+clustering-de-images\output\20241127112132.jpg - 2 identificações - 1 face correta - 1 face incorreta
+clustering-de-images\output\20241127112232.jpg - 4 identificações - 1 face correta - 3 face incorreta
+clustering-de-images\output\20241127112333.jpg - 3 identificações - 1 face correta - 2 face incorreta
+clustering-de-images\output\20241127112433.jpg - 3 identificações - 1 face correta - 2 face incorreta

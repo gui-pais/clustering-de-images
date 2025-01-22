@@ -13,6 +13,10 @@ class DetectorFactory:
         match detector_type:
             case "dlib":
                 return DlibFaceDetector(predictor_model_path, face_recognition_model_path, similarity_threshold)
+            
+            case "Yolo":
+                face_detection_model_path = kwargs.get("face_detection_model_path")
+                return YoloFaceDetector(face_detection_model_path, predictor_model_path, face_recognition_model_path, similarity_threshold)
 
             case "super_resolution":
                 return SuperResolutionFaceDetector(predictor_model_path, face_recognition_model_path, similarity_threshold)

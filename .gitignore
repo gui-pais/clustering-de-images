@@ -32,6 +32,7 @@ Thumbs.db
 *.csv
 resultados gerais c cluster.txt
 resultados gerais teste c 15 imagens.txt
+iteracao.txt
 
 # Dependências geradas por Poetry ou Pipenv 
 poetry.lock
